@@ -22,7 +22,8 @@ import ai.djl.ndarray.types.Shape;
 import ai.djl.mxnet.engine.MxNDManager;
 
 /*  Reference:
- *      https://d2l.djl.ai/chapter_preliminaries/ndarray.html
+ *      - https://d2l.djl.ai/chapter_preliminaries/ndarray.html
+ *      - https://towardsdatascience.com/ndarray-a-java-based-n-dim-array-toolkit-60b4035b10b8
  *      
  *  An ndarray represents a (possibly multi-dimensional) array of numerical values. 
  *  With one axis, an ndarray corresponds (in math) to a vector. 
@@ -49,7 +50,8 @@ public class ndarray_test implements Runnable {
     @Override
     public void run() {
         for(int x=0; x < 1; x++){
-            ndarrayService.simpleNDArray();
+            ndarrayService.onesTest();
+            ndarrayService.arangeTest();
         }
     }
 
@@ -59,7 +61,7 @@ public class ndarray_test implements Runnable {
 class  NDArrayService {
     public static final Logger log = Logger.getLogger("NDArrayService");
 
-    void simpleNDArray() {
+    void onesTest() {
 
         // NDManager helps manage the memory usage of the NDArrays. It creates them and helps clear them as well. 
         // Once you finish using an NDManager, it will clear all of the NDArrays that were created within it’s scope as well.
@@ -73,7 +75,25 @@ class  NDArrayService {
             NDArray ndArray = ndManager.ones(new Shape(2,3));
 
             ((MxNDManager)ndManager).debugDump(5);
-            log.infov("ndArray of size {0} = \n{1}", ndArray.size() , ndArray.toDebugString(true));
+
+            log.infov("\nPre-transpose:  ndArray of size {0} = \n{1}", ndArray.size() , ndArray.toDebugString(true));
+
+            // In linear algebra, the transpose of a matrix is an operator which flips a matrix over its diagonal; that is, it switches the row and column indices of the matrix A by producing another matrix
+            ndArray = ndArray.transpose().addi(10);
+
+            log.infov("\nPost-transpose: ndArray of size {0} = \n{1}", ndArray.size() , ndArray.toDebugString(true));
+        }
+    }
+
+    void arangeTest() {
+        try(NDManager ndManager = NDManager.newBaseManager()){
+            ((MxNDManager)ndManager).debugDump(5);
+            NDArray ndArray = ndManager.arange(5,14);
+
+            ndArray = ndArray.get(ndArray.gte(10));
+
+            log.infov("\nfiltered ndArray of size {0} = \n{1}", ndArray.size() , ndArray.toDebugString(true));
+
         }
     }
 }
