@@ -18,7 +18,10 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
-/* Pre-reqs:
+/* Reference:
+ *  https://opencv-java-tutorials.readthedocs.io/en/latest/02-first-java-application-with-opencv.html
+ *
+ * Pre-reqs:
  *  # dnf install opencv-java -y
  * 
  * Execution:
