@@ -4,6 +4,7 @@
 // `-Dquarkus.version=<version>` to override it.
 //DEPS io.quarkus:quarkus-bom:${quarkus.version:2.16.3.Final}@pom
 //DEPS io.quarkus.arc:arc
+//DEPS io.quarkus:quarkus-picocli
 //FILES application.properties
 
 import java.time.Duration;
@@ -17,34 +18,51 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.enterprise.context.Dependent;
+
+import picocli.CommandLine;
 
 /*
  * Reference:
  *  https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io.smallrye.mutiny/io/smallrye/mutiny/Multi.html          :   Mutiny Multi javadocs
  *  https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html                                   :   java function javadocs
  */
-public class hellomutiny_multi {
+@CommandLine.Command
+public class hellomutiny_multi implements Runnable{
 
-    private static AtomicInteger counter = new AtomicInteger(0);
+    @CommandLine.Parameters(index = "0", description = "Delay in milliseconds between ticks", defaultValue = "0")
+    int delay;
 
-    public static void main(String... args) throws NumberFormatException {
+    @CommandLine.Parameters(index = "1", description = "# of ticks", defaultValue = "0")
+    int totalTicks;
 
-        testSimpleTake();
-        //observeRangeEventsAsync(Long.parseLong(args[0]), Integer.parseInt(args[1]) );
-        observeTickEventsAsync(Long.parseLong(args[0]), Integer.parseInt(args[1]) );
-        System.out.println("Finished main");
+    private final MutinyMultiResource multiService;
 
-        // TO-DO:  when Multi.createFrom().ticks() is utilized, program doesn't seem to want to exit
-        System.exit(1);
-
+    public hellomutiny_multi(MutinyMultiResource multiService) { 
+        this.multiService= multiService;
     }
 
-    private static void testSimpleTake() {
+    @Override
+    public void run() {
+        
+        multiService.testSimpleTake();
+        //multiService.observeRangeEventsAsync( delay, totalTicks );
+        multiService.observeTickEventsAsync(delay, totalTicks);
+        System.out.println("Finished run");
+    }
+}
+
+@Dependent
+class MutinyMultiResource {
+
+    private AtomicInteger counter = new AtomicInteger(0);
+
+    public void testSimpleTake() {
         List<Integer> list = Multi.createFrom().range(1, 5).select().first(1).collect().asList().await().indefinitely();
         System.out.println("testSimpleTake list size = "+list.size());
     }
 
-    private static void observeRangeEventsAsync(long delay, int totalTicks){
+    public void observeRangeEventsAsync(long delay, int totalTicks){
         Multi.createFrom().range(0, totalTicks)
     .       onSubscription().invoke(sub -> System.out.println("Received subscription: " + sub))
             .onRequest().invoke(req -> System.out.println("Got a request: " + req))
@@ -54,8 +72,7 @@ public class hellomutiny_multi {
             );
     }
  
-    // call() and invoke() functions to observe events
-    private static void observeTickEventsAsync(long delay, int totalTicks) {
+    public void observeTickEventsAsync(long delay, int totalTicks) {
         
         Multi<Long> multi = Multi.createFrom().ticks().every(Duration.ofMillis(delay))
 
