@@ -91,7 +91,6 @@ class MutinyMultiResource {
             .onSubscription().call( (sub) -> {     
 
                 System.out.println("Just received a subscription");
-                sub.request(totalTicks);  // Doesn't seem to do anything
                 return Uni.createFrom().nullItem();
             })
 
@@ -119,10 +118,6 @@ class MutinyMultiResource {
                 System.out.println("Just Terminated");
                 return Uni.createFrom().voidItem();
             });
-            /*.subscribe().with(
-                item -> System.out.println("sub item = "+item),
-                failure -> System.out.println("failure item = "+failure)
-            );*/
 
             // Multis are lazy by nature. To trigger the computation, you must subscribe.
             Cancellable cObj = multi
