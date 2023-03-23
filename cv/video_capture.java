@@ -10,6 +10,8 @@
 
 import picocli.CommandLine;
 
+import java.util.Arrays;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -21,12 +23,15 @@ import org.opencv.videoio.VideoCapture;
 
 import nu.pattern.OpenCV;
 
+import com.sun.security.auth.module.UnixSystem;
+
 /* 
  * Pre-reqs:
- *  # dnf install opencv-java -y
+ *  $ sudo dnf install opencv-java -y
+ *  $ sudo usermod -a -G video $USER
  * 
  * Execution:
- *  $ jbang -Djava.library.path=/usr/lib/java video_capture.java
+ *  $ jbang video_capture.java
  */
 
 @CommandLine.Command
@@ -61,10 +66,13 @@ class  CVService {
         // Enable web cam  (but don't start capturing images and executing object detection predictions on those images just yet)
         OpenCV.loadShared();
         VideoCapture vCapture = new VideoCapture(videoCaptureDevice);
-        if(!vCapture.isOpened())
-            throw new RuntimeException("Unable to access video capture device w/ id = " + videoCaptureDevice);
+        UnixSystem uSystem = new UnixSystem();
+        long[] groups = uSystem.getGroups();
+        if(!vCapture.isOpened()) {
+            throw new RuntimeException("Unable to access video capture device w/ id = " + videoCaptureDevice + " and groups: "+Arrays.toString(groups));
+        }
         else
-            log.infov("Now capturing video on device {0}", videoCaptureDevice);
+            log.infov("Now capturing video on device {0} with OS groups {1}", videoCaptureDevice, Arrays.toString(groups));
 
         Mat unboxedMat = new Mat();
         boolean captured = vCapture.read(unboxedMat);
