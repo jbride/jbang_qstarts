@@ -2,9 +2,9 @@
 //JAVA 11+
 // Update the Quarkus version to what you want here or run jbang with
 // `-Dquarkus.version=<version>` to override it.
-//DEPS io.quarkus:quarkus-bom:${quarkus.version:2.16.3.Final}@pom
+//DEPS io.quarkus.platform:quarkus-bom:${quarkus.version:3.2.0.Final}@pom
 //DEPS io.quarkus:quarkus-picocli
-//DEPS ai.djl:bom:${djl.version:0.21.0}@pom
+//DEPS ai.djl:bom:${djl.version:0.22.1}@pom
 //DEPS ai.djl.opencv:opencv
 //FILES application.properties
 
@@ -12,12 +12,10 @@ import picocli.CommandLine;
 
 import java.util.Arrays;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 import org.jboss.logging.Logger;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
