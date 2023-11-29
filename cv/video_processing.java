@@ -27,7 +27,7 @@ import org.opencv.highgui.HighGui;
  *  $ sudo usermod -a -G video $USER
  * 
  * Execution:
- *  $ jbang -Djava.library.path=/usr/lib/java video_capture.java VH-Panama.mp4
+ *  $ jbang -Djava.library.path=/usr/lib/java video_processing.java VH-Panama.mp4
  */
 
 @CommandLine.Command
@@ -59,7 +59,9 @@ class  CVService {
 
         log.info("Working Directory = " + System.getProperty("user.dir"));
 
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // Not actually needed
+        // Just ensure opencv-java gstreamer1-plugin-libav packages are installed and "java.library.path" includes path to those installed C++ libraries
+        //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         
         OpenCV.loadShared();
         VideoCapture vCapture = new VideoCapture(testVideoFile, Videoio.CAP_ANY);
