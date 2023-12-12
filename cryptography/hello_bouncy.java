@@ -2,14 +2,19 @@
 //DEPS org.bouncycastle:bcpkix-jdk18on:1.76
 
 
-// jbang edit --open=code hello_bouncy.java
+// Edit:  jbang edit --open=code hello_bouncy.java
+// Execute: jbang ./hello_bouncy <keystore and private key password>
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -23,6 +28,9 @@ public class hello_bouncy {
     private static final String CRYPTO_POLICY="crypto.policy";
     private static final String UNLIMITED="unlimited";
     private static final String X509_CERT_FILE_PATH="/tmp/crypto/ratwater.cer";
+    private static final String PKCS12="PKCS12";
+    private static final String KEYSTORE_PATH = "/tmp/crypto/ratwater.p12";
+    private static final String KEY_NAME="ratwater";
 
     public static void main(String[] args) throws Exception {
 
@@ -32,7 +40,9 @@ public class hello_bouncy {
         System.out.println(MessageDigest.getInstance("SHA1", "BC").getProvider().getName());
 
         cryptoJurisdiction();
-        x509Certs();
+
+        String password = args[0];
+        certsAndKeystores(password);
 
     }
 
@@ -58,13 +68,18 @@ public class hello_bouncy {
           && openssl pkcs12 -export -name ratwater -out $C_DIR/ratwater.p12 -inkey $C_DIR/private-key.pem -in $C_DIR/ratwater.cer
      
      */
-    private static void x509Certs() throws CertificateException, FileNotFoundException, NoSuchProviderException {
+    private static void certsAndKeystores(String password) throws CertificateException, NoSuchProviderException, KeyStoreException, NoSuchAlgorithmException, IOException, UnrecoverableKeyException {
         CertificateFactory certFactory= CertificateFactory.getInstance("X.509", "BC");
  
         X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(new FileInputStream(X509_CERT_FILE_PATH));
         certificate.checkValidity();
         System.out.println("X500 cert sig algorithm: "+certificate.getSigAlgName());
         System.out.println("X500 Subject Principal:  "+certificate.getSubjectX500Principal());
+
+        KeyStore keystore = KeyStore.getInstance(PKCS12);
+        keystore.load(new FileInputStream(KEYSTORE_PATH), password.toCharArray());
+        PrivateKey privKey = (PrivateKey)keystore.getKey(KEY_NAME, password.toCharArray());
+        System.out.println("privKey algorithm= "+privKey.getAlgorithm()+" : privKey format= "+privKey.getFormat());
     }
 
 }
